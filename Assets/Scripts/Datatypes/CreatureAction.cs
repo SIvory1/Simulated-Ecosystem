@@ -6,5 +6,7 @@
     GoingToWater,
     Eating,
     Drinking,
-    SearchingForMate
+    GoingToMate,
+    SearchingForMate,
+    Mating
 }

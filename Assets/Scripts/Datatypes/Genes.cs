@@ -7,11 +7,15 @@ public class Genes {
     static readonly System.Random prng = new System.Random ();
 
     public readonly bool isMale;
+    public readonly float desirability;
+    public readonly float gestationDuration;
     public readonly float[] values;
 
     public Genes (float[] values) {
-        isMale = RandomValue () < 0.5f;
+        isMale = values[0] < 0.5f;
         this.values = values;
+        desirability = values[1];
+        gestationDuration = values[2];
     }
 
     public static Genes RandomGenes (int num) {
