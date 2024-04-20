@@ -19,7 +19,8 @@ public class Animal : LivingEntity {
     float moveSpeed = 1.5f;
     float timeToDeathByHunger = 200;
     float timeToDeathByThirst = 200;
-    float minBreedChance = 0.25f;
+    float minBreedChance = 0.5f;
+    List<Animal> unimpressedFemales = new List<Animal>();
 
     float drinkDuration = 6;
     float eatDuration = 10;
@@ -35,9 +36,15 @@ public class Animal : LivingEntity {
     public float thirst;
     public float reproductiveUrge;
     public float currentGestationDuration = 0.0f;
-
     public float maxGestationDuration = 15.0f;
-    bool pregnant = false;
+    public bool pregnant = false;
+    float mateWaitTimer = 0.0f;
+    public float mateWaitTimerMax = 10.0f;
+    float maturityTimer = 0.0f;
+    public float maturityTimerMax = 15.0f;
+    bool mature = false;
+
+    public LivingEntity rabbitPrefab;
 
     protected LivingEntity foodTarget;
     protected Coord waterTarget;
@@ -86,8 +93,15 @@ public class Animal : LivingEntity {
         { 
             pregnant = false;
             currentGestationDuration = 0f;
-            print("babymake"); 
+            print("babymake");
+            Environment.SpawnChildren(rabbitPrefab, coord);
         }
+        if(currentAction == CreatureAction.GoingToMate) { mateWaitTimer += Time.deltaTime; }
+        if(currentAction != CreatureAction.GoingToMate) { mateWaitTimer = 0f; }
+        if(mateWaitTimer > mateWaitTimerMax) {  mateWaitTimer = 0f; currentAction = CreatureAction.Exploring; }
+
+        if (!mature) { maturityTimer += Time.deltaTime; }
+        if(maturityTimer > maturityTimerMax) { mature = true; }
 
         // Animate movement. After moving a single tile, the animal will be able to choose its next action
         if (animatingMovement) {
@@ -119,7 +133,7 @@ public class Animal : LivingEntity {
         bool currentlyEating = currentAction == CreatureAction.Eating && foodTarget && hunger > 0;
         bool currentlyDrinking = currentAction == CreatureAction.Drinking && thirst > 0;
         
-        if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking)
+        if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
         {
             FindMate();
         }
@@ -148,16 +162,24 @@ public class Animal : LivingEntity {
         }
         if (genes.isMale) 
         {
-            Animal[] potentialFemales = Environment.SensePotentialMates(coord, this).ToArray();
-            for(int i = 0; i < potentialFemales.Length; i++)
+            List<Animal> potentialFemales = Environment.SensePotentialMates(coord, this);
+
+            for(int i = 0; i < potentialFemales.Count; i++)
             {
-                if (potentialFemales[i].RequestMate(this))
+                if (!unimpressedFemales.Contains(potentialFemales[i]))
                 {
-                    mateTarget = potentialFemales[i];
-                    currentAction = CreatureAction.GoingToMate;
-                    CreatePath(potentialFemales[i].coord);
-                    return;
-                }                
+                    if (potentialFemales[i].RequestMate(this))
+                    {
+                        mateTarget = potentialFemales[i];
+                        currentAction = CreatureAction.GoingToMate;
+                        CreatePath(potentialFemales[i].coord);
+                        break;
+                    }
+                    else
+                    {
+                        unimpressedFemales.Add(potentialFemales[i]);
+                    }
+                }
             }
         } 
     }

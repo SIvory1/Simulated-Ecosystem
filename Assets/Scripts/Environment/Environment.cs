@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using TerrainGeneration;
 using UnityEngine;
 
@@ -182,6 +183,19 @@ public class Environment : MonoBehaviour {
         return bestNeighbour;
     }
 
+    public static void SpawnChildren(LivingEntity speciesPrefab, Coord spawnCoord)
+    {
+        int childAmount = Random.Range(2, 5);
+        
+        for (int i = 0; i < childAmount; i++)
+        {
+            var entity = Instantiate(speciesPrefab);
+            entity.Init(spawnCoord);
+
+            speciesMaps[entity.species].Add(entity, spawnCoord);
+        }
+    }
+
     // Call terrain generator and cache useful info
     void Init () {
         var sw = System.Diagnostics.Stopwatch.StartNew ();
@@ -331,7 +345,7 @@ public class Environment : MonoBehaviour {
                         MeshRenderer tree = Instantiate (treePrefab, tileCentres[x, y], rot);
                         tree.transform.parent = treeHolder;
                         tree.transform.localScale = Vector3.one * scale;
-                        tree.material.color = new Color (r, g, b);
+                        tree.material.color = new UnityEngine.Color (r, g, b);
 
                         // Mark tile unwalkable
                         walkable[x, y] = false;

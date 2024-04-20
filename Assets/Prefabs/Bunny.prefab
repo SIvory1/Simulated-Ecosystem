@@ -65,6 +65,9 @@ MonoBehaviour:
   reproductiveUrge: 0
   currentGestationDuration: 0
   maxGestationDuration: 15
+  pregnant: 0
+  mateWaitTimerMax: 10
+  rabbitPrefab: {fileID: 3874918950189636065}
 --- !u!1001 &322534139445717557
 PrefabInstance:
   m_ObjectHideFlags: 0
