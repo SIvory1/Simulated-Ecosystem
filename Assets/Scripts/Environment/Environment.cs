@@ -183,6 +183,44 @@ public class Environment : MonoBehaviour {
         return bestNeighbour;
     }
 
+    public static Coord FleeGetNextTileWeighted(Coord current, Coord previous, int weightingIterations = 3)
+    {
+
+        if (current == previous)
+        {
+
+            return GetNextTileRandom(current);
+        }
+
+        Coord forwardOffset = (current - previous);
+       
+        // Get walkable neighbours
+        var neighbours = walkableNeighboursMap[current.x, current.y];
+        if (neighbours.Length == 0)
+        {
+            return current;
+        }
+
+        // From n random tiles, pick the one that is most aligned with the forward direction:
+        Vector2 forwardDir = new Vector2(forwardOffset.x, forwardOffset.y).normalized;
+        float bestScore = float.MinValue;
+        Coord bestNeighbour = current;
+
+        for (int i = 0; i < weightingIterations; i++)
+        {
+            Coord neighbour = neighbours[prng.Next(neighbours.Length)];
+            Vector2 offset = neighbour - current;
+            float score = Vector2.Dot(offset.normalized, forwardDir);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestNeighbour = neighbour;
+            }
+        }
+
+        return bestNeighbour;
+    }
+
     public static void SpawnChildren(LivingEntity speciesPrefab, Coord spawnCoord, float[] motherValues, float[] fatherValues)
     {
         int childAmount = Random.Range(2, 5);

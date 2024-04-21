@@ -8,5 +8,6 @@
     Drinking,
     GoingToMate,
     SearchingForMate,
-    Mating
+    Mating,
+    Fleeing,
 }

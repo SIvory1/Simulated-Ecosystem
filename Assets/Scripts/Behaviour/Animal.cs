@@ -67,6 +67,12 @@ public class Animal : LivingEntity {
     const float sqrtTwo = 1.4142f;
     const float oneOverSqrtTwo = 1 / sqrtTwo;
 
+    // start of the worst flee you have ever seen
+    public bool beingHunted = false;
+    [SerializeField] Animal otherAnimal;
+    public Animal animalToFleeFrom;
+    
+
     public override void Init (Coord coord) {
         base.Init (coord);
         moveFromCoord = coord;
@@ -145,7 +151,11 @@ public class Animal : LivingEntity {
         bool currentlyEating = currentAction == CreatureAction.Eating && foodTarget && hunger > 0;
         bool currentlyDrinking = currentAction == CreatureAction.Drinking && thirst > 0;
         
-        if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
+        if (beingHunted)
+        {
+            currentAction = CreatureAction.Fleeing;
+        }
+        else if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
         {
             FindMate();
         }
@@ -162,12 +172,12 @@ public class Animal : LivingEntity {
             }
         }
 
-        Act ();
-
+        Act();
     }
 
     protected virtual void FindMate()
     {
+        ResetOtherAnimal();
         if (currentAction != CreatureAction.GoingToMate)
         { 
             currentAction = CreatureAction.SearchingForMate;
@@ -213,13 +223,35 @@ public class Animal : LivingEntity {
         if (foodSource) {
             currentAction = CreatureAction.GoingToFood;
             foodTarget = foodSource;
+
+            // Remove previous animal from being hunted
+            ResetOtherAnimal();
+            // Add the new animal to being hunted
+            otherAnimal = foodTarget.GetComponent<Animal>();
+            if (otherAnimal != null)
+            {
+                otherAnimal.beingHunted = true;
+                otherAnimal.animalToFleeFrom = this;
+            }
+
             CreatePath (foodTarget.coord);
 
-        } else {
+        } 
+        else {
             currentAction = CreatureAction.Exploring;
+
+            ResetOtherAnimal();
         }
     }
-
+    void ResetOtherAnimal()
+    {
+        if (otherAnimal != null)
+        {
+            otherAnimal.beingHunted = false;
+            otherAnimal.animalToFleeFrom = null;
+            otherAnimal = null;
+        }
+    }
     protected virtual void FindWater () {
         Coord waterTile = Environment.SenseWater (coord);
         if (waterTile != Coord.invalid) {
@@ -277,6 +309,9 @@ public class Animal : LivingEntity {
                         pathIndex++;
                     }                    
                 }
+                break;
+            case CreatureAction.Fleeing:
+                StartMoveToCoord(Environment.FleeGetNextTileWeighted(coord, animalToFleeFrom.coord));
                 break;
         }
     }
