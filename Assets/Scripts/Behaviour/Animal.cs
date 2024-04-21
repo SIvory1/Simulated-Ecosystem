@@ -150,7 +150,8 @@ public class Animal : LivingEntity {
         // Eat if (more hungry than thirsty) or (currently eating and not critically thirsty)
         bool currentlyEating = currentAction == CreatureAction.Eating && foodTarget && hunger > 0;
         bool currentlyDrinking = currentAction == CreatureAction.Drinking && thirst > 0;
-        
+
+        //FindPredator();
         if (beingHunted)
         {
             currentAction = CreatureAction.Fleeing;
@@ -252,6 +253,17 @@ public class Animal : LivingEntity {
             otherAnimal = null;
         }
     }
+    protected virtual void FindPredator()
+    {
+        LivingEntity predator = Environment.SensePredator(coord, this);
+        if (predator)
+        {
+            animalToFleeFrom = predator.GetComponent<Animal>();
+            beingHunted = true;
+            currentAction = CreatureAction.Fleeing;
+        }
+    }
+
     protected virtual void FindWater () {
         Coord waterTile = Environment.SenseWater (coord);
         if (waterTile != Coord.invalid) {

@@ -104,6 +104,32 @@ public class Environment : MonoBehaviour {
         return null;
     }
 
+    public static LivingEntity SensePredator (Coord coord, Animal self)
+    {
+        var predators = new List<LivingEntity>();
+
+        List<Species> predatorsList = predatorsBySpecies[self.species];
+        for (int i = 0; i < predatorsList.Count; i++)
+        {
+            Map speciesMap = speciesMaps[predatorsList[i]];
+
+            predators.AddRange(speciesMap.GetEntities(coord, Animal.maxViewDistance));
+        }
+
+        // Return first visible predator
+        for (int i = 0; i < predators.Count; i++)
+        {
+            Coord targetCoord = predators[i].coord;
+            if (EnvironmentUtility.TileIsVisibile(coord.x, coord.y, targetCoord.x, targetCoord.y))
+            {
+                return predators[i];
+            }
+        }
+
+        return null;
+        
+    }
+
     // Return list of animals of the same species, with the opposite gender, who are also searching for a mate
     public static List<Animal> SensePotentialMates (Coord coord, Animal self) {
         Map speciesMap = speciesMaps[self.species];
