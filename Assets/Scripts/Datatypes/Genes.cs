@@ -12,8 +12,8 @@ public class Genes {
     public readonly float[] values;
 
     public Genes (float[] values) {
-        isMale = values[0] < 0.5f;
         this.values = values;
+        isMale = values[0] < 0.5f;
         desirability = values[1];
         gestationDuration = values[2];
     }
@@ -26,11 +26,32 @@ public class Genes {
         return new Genes (values);
     }
 
-    public static Genes InheritedGenes (Genes mother, Genes father) {
-        float[] values = new float[mother.values.Length];
-        // TODO: implement inheritance
-        Genes genes = new Genes (values);
-        return genes;
+    public static Genes InheritedGenes(float[] mother, float[] father) {
+        float[] values = new float[mother.Length];
+        
+        values[0] = RandomValue();
+
+        for(int i = 1; i < values.Length; i++)
+        {
+            values[i] = GeneArbitration(mother[i], father[i]);
+        }
+        
+        
+        
+        return new Genes(values);
+    }
+
+    static float GeneArbitration(float mother, float father)
+    {
+        float gene = (prng.NextDouble() < 0.5) ? mother : father;
+
+        if(prng.NextDouble() < mutationChance)
+        {
+            float mutateAmount = RandomGaussian() * maxMutationAmount;
+            gene += mutateAmount;
+        }
+
+        return gene;
     }
 
     static float RandomValue () {

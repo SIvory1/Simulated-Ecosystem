@@ -183,14 +183,14 @@ public class Environment : MonoBehaviour {
         return bestNeighbour;
     }
 
-    public static void SpawnChildren(LivingEntity speciesPrefab, Coord spawnCoord)
+    public static void SpawnChildren(LivingEntity speciesPrefab, Coord spawnCoord, float[] motherValues, float[] fatherValues)
     {
         int childAmount = Random.Range(2, 5);
         
         for (int i = 0; i < childAmount; i++)
         {
             var entity = Instantiate(speciesPrefab);
-            entity.Init(spawnCoord);
+            entity.Init(spawnCoord, motherValues, fatherValues);
 
             speciesMaps[entity.species].Add(entity, spawnCoord);
         }

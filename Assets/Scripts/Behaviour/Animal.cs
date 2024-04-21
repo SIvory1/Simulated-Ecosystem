@@ -48,7 +48,7 @@ public class Animal : LivingEntity {
 
     protected LivingEntity foodTarget;
     protected Coord waterTarget;
-    protected LivingEntity mateTarget;
+    protected Animal mateTarget;
 
     // Move data:
     bool animatingMovement;
@@ -73,8 +73,19 @@ public class Animal : LivingEntity {
         genes = Genes.RandomGenes(3);
 
         material.color = (genes.isMale) ? maleColour : femaleColour;
-
+        //print(genes.desirability);
         ChooseNextAction ();
+    }
+    public override void Init(Coord coord, float[] mother, float[] father)
+    {
+        base.Init(coord);
+        moveFromCoord = coord;
+        genes = Genes.InheritedGenes(mother, father);
+
+        material.color = (genes.isMale) ? maleColour : femaleColour;
+        //print("DesirabilityMOTHER : " + mother.desirability + "DesirabilityFATHER : " + father.desirability + "Desirability : " + genes.desirability);
+
+        ChooseNextAction();
     }
 
 
@@ -94,7 +105,8 @@ public class Animal : LivingEntity {
             pregnant = false;
             currentGestationDuration = 0f;
             print("babymake");
-            Environment.SpawnChildren(rabbitPrefab, coord);
+            Environment.SpawnChildren(rabbitPrefab, coord, genes.values, mateTarget.genes.values);
+            //print(mateTarget.genes.values[1] + " " + genes.values[1]);
         }
         if(currentAction == CreatureAction.GoingToMate) { mateWaitTimer += Time.deltaTime; }
         if(currentAction != CreatureAction.GoingToMate) { mateWaitTimer = 0f; }

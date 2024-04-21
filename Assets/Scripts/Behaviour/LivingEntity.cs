@@ -33,6 +33,8 @@ public class LivingEntity : MonoBehaviour {
         }
     }
 
+    public virtual void Init(Coord coord, float[] mother, float[] father) { }
+
     protected virtual void Die (CauseOfDeath cause) {
         if (!dead) {
             dead = true;
