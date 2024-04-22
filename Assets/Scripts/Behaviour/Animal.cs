@@ -16,9 +16,10 @@ public class Animal : LivingEntity {
 
     // Settings:
     float timeBetweenActionChoices = 1;
-    float moveSpeed = 1.5f;
+    public float moveSpeed = 1.5f;
     float timeToDeathByHunger = 200;
     float timeToDeathByThirst = 200;
+    float hungerMultiplier = 1;
     float minBreedChance = 0.5f;
     List<Animal> unimpressedFemales = new List<Animal>();
 
@@ -76,10 +77,12 @@ public class Animal : LivingEntity {
     public override void Init (Coord coord) {
         base.Init (coord);
         moveFromCoord = coord;
-        genes = Genes.RandomGenes(3);
-
+        genes = Genes.RandomGenes(4);
+   
         material.color = (genes.isMale) ? maleColour : femaleColour;
-        //print(genes.desirability);
+        
+        HappinessModification();
+       
         ChooseNextAction ();
     }
     public override void Init(Coord coord, float[] mother, float[] father)
@@ -90,8 +93,17 @@ public class Animal : LivingEntity {
 
         material.color = (genes.isMale) ? maleColour : femaleColour;
         //print("DesirabilityMOTHER : " + mother.desirability + "DesirabilityFATHER : " + father.desirability + "Desirability : " + genes.desirability);
-
+        
+        HappinessModification();
+        
         ChooseNextAction();
+    }
+
+    void HappinessModification()
+    {
+        float happinessMod = genes.happiness - 0.5f;
+        moveSpeed += happinessMod;
+        hungerMultiplier += happinessMod;
     }
 
 
@@ -99,8 +111,8 @@ public class Animal : LivingEntity {
     protected virtual void Update () {
 
         // Increase hunger and thirst over time
-        hunger += Time.deltaTime * 1 / timeToDeathByHunger;
-        thirst += Time.deltaTime * 1 / timeToDeathByThirst;
+        hunger += (Time.deltaTime * hungerMultiplier) / timeToDeathByHunger;
+        thirst += (Time.deltaTime * 1) / timeToDeathByThirst;
 
         if (pregnant) { reproductiveUrge = 0.0f; }
         else { reproductiveUrge = 0.4f; }

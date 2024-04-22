@@ -8,14 +8,16 @@ public class Genes {
 
     public readonly bool isMale;
     public readonly float desirability;
-    public readonly float gestationDuration;
+    public readonly float courage;
+    public readonly float happiness;
     public readonly float[] values;
 
     public Genes (float[] values) {
         this.values = values;
         isMale = values[0] < 0.5f;
         desirability = values[1];
-        gestationDuration = values[2];
+        courage = values[2];
+        happiness = values[3];
     }
 
     public static Genes RandomGenes (int num) {
