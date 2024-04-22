@@ -106,8 +106,6 @@ public class Animal : LivingEntity {
         hungerMultiplier += happinessMod;
     }
 
-
-
     protected virtual void Update () {
 
         // Increase hunger and thirst over time
@@ -163,10 +161,10 @@ public class Animal : LivingEntity {
         bool currentlyEating = currentAction == CreatureAction.Eating && foodTarget && hunger > 0;
         bool currentlyDrinking = currentAction == CreatureAction.Drinking && thirst > 0;
 
-        //FindPredator();
+        FindPredator();
         if (beingHunted)
         {
-            currentAction = CreatureAction.Fleeing;
+            //currentAction = CreatureAction.Fleeing;
         }
         else if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
         {
@@ -238,14 +236,14 @@ public class Animal : LivingEntity {
             foodTarget = foodSource;
 
             // Remove previous animal from being hunted
-            ResetOtherAnimal();
+            //ResetOtherAnimal();
             // Add the new animal to being hunted
-            otherAnimal = foodTarget.GetComponent<Animal>();
-            if (otherAnimal != null)
-            {
-                otherAnimal.beingHunted = true;
-                otherAnimal.animalToFleeFrom = this;
-            }
+            //otherAnimal = foodTarget.GetComponent<Animal>();
+            //if (otherAnimal != null)
+            //{
+            //    otherAnimal.beingHunted = true;
+            //    otherAnimal.animalToFleeFrom = this;
+            //}
 
             CreatePath (foodTarget.coord);
 
@@ -253,7 +251,7 @@ public class Animal : LivingEntity {
         else {
             currentAction = CreatureAction.Exploring;
 
-            ResetOtherAnimal();
+            //ResetOtherAnimal();
         }
     }
     void ResetOtherAnimal()
@@ -273,6 +271,12 @@ public class Animal : LivingEntity {
             animalToFleeFrom = predator.GetComponent<Animal>();
             beingHunted = true;
             currentAction = CreatureAction.Fleeing;
+        }
+        else
+        {
+            animalToFleeFrom = null;
+            beingHunted = false;
+            currentAction = CreatureAction.Exploring;
         }
     }
 
@@ -414,6 +418,11 @@ public class Animal : LivingEntity {
             }
             if (surroundings.nearestWaterTile != Coord.invalid) {
                 Gizmos.DrawLine (transform.position, Environment.tileCentres[surroundings.nearestWaterTile.x, surroundings.nearestWaterTile.y]);
+            }
+
+            if (surroundings.nearestThreat != null && species == Species.Rabbit)
+            {
+                Gizmos.DrawLine (transform.position, surroundings.nearestThreat.transform.position);
             }
 
             if (currentAction == CreatureAction.GoingToFood) {

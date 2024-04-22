@@ -28,6 +28,13 @@ public class Environment : MonoBehaviour {
     public Transform mapCoordTransform;
     public float mapViewDst;
 
+    // Courage view modifiers
+    public float courageViewModifier = 20f;
+    public float basePredatorViewDistance = 10f;
+    // workarounds to use above values
+    static float courageViewModifierStatic;
+    public static float basePredatorViewDistanceStatic;
+
     // Cached data:
     public static Vector3[, ] tileCentres;
     public static bool[, ] walkable;
@@ -50,6 +57,9 @@ public class Environment : MonoBehaviour {
 
     void Start () {
         prng = new System.Random ();
+
+        courageViewModifierStatic = courageViewModifier;
+        basePredatorViewDistanceStatic = basePredatorViewDistance;
 
         Init ();
         SpawnInitialPopulations ();
@@ -120,7 +130,11 @@ public class Environment : MonoBehaviour {
         {
             Map speciesMap = speciesMaps[predatorsList[i]];
 
-            predators.AddRange(speciesMap.GetEntities(coord, Animal.maxViewDistance));
+            float v = -(self.genes.courage * courageViewModifierStatic) + basePredatorViewDistanceStatic; // change this 
+
+            Debug.Log("Courage View Distance: " + v + " True Courage: " + self.genes.courage);
+
+            predators.AddRange(speciesMap.GetEntities(coord, v));
         }
 
         // Return first visible predator
@@ -160,6 +174,10 @@ public class Environment : MonoBehaviour {
         var surroundings = new Surroundings ();
         surroundings.nearestFoodSource = closestPlant;
         surroundings.nearestWaterTile = closestVisibleWaterMap[coord.x, coord.y];
+
+       
+        var closestFox = speciesMaps[Species.Fox].ClosestEntity (coord, Animal.maxViewDistance);
+        surroundings.nearestThreat = closestFox;
 
         return surroundings;
     }
