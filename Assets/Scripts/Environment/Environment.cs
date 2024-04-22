@@ -132,7 +132,7 @@ public class Environment : MonoBehaviour {
 
             float v = -(self.genes.courage * courageViewModifierStatic) + basePredatorViewDistanceStatic; // change this 
 
-            Debug.Log("Courage View Distance: " + v + " True Courage: " + self.genes.courage);
+            //Debug.Log("Courage View Distance: " + v + " True Courage: " + self.genes.courage);
 
             predators.AddRange(speciesMap.GetEntities(coord, v));
         }
