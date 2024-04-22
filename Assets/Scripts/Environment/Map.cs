@@ -230,4 +230,24 @@ public class Map {
             }
         }
     }
+
+    public List<LivingEntity> GetEntitiesBySpecies()
+    {
+        var entities = new List<LivingEntity>();
+
+        // Iterate through all regions
+        for (int y = 0; y < numRegions; y++)
+        {
+            for (int x = 0; x < numRegions; x++)
+            {
+                // Iterate through entities in the current region
+                foreach (var entity in map[x, y])
+                {
+                   entities.Add(entity);
+                }
+            }
+        }
+
+        return entities;
+    }
 }

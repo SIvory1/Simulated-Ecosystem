@@ -10,6 +10,11 @@ public class Environment : MonoBehaviour {
 
     public int seed;
 
+    public float simulationTime = 0f;
+    public float snapshotTimer = 0f;
+    public float snapshotInterval = 10.0f;
+    bool simulationRunning = false;
+
     [Header ("Trees")]
     public MeshRenderer treePrefab;
     [Range (0, 1)]
@@ -40,6 +45,8 @@ public class Environment : MonoBehaviour {
     TerrainGenerator.TerrainData terrainData;
 
     static Dictionary<Species, Map> speciesMaps;
+
+    DataExport data = new();
 
     void Start () {
         prng = new System.Random ();
@@ -375,6 +382,7 @@ public class Environment : MonoBehaviour {
             }
         }
         Debug.Log ("Init time: " + sw.ElapsedMilliseconds);
+        simulationRunning = true;
     }
 
     void SpawnTrees () {
@@ -470,6 +478,57 @@ public class Environment : MonoBehaviour {
             print (s);
         }
     }
+
+    private void Update()
+    {
+        if(snapshotTimer > snapshotInterval) 
+        {  
+            snapshotTimer = 0;
+            TakeSnapshot(Species.Rabbit);
+        }
+
+        if (simulationRunning)
+        {
+            simulationTime += Time.deltaTime;
+            snapshotTimer += Time.deltaTime;
+        }
+
+        if(Input.GetKeyDown(KeyCode.P) && simulationRunning)
+        {
+            simulationRunning = false;
+            data.Export();
+        }
+    }
+
+    void TakeSnapshot(Species speciesToQuery)
+    {
+        Map speciesMap = speciesMaps[speciesToQuery];
+        Coord coord = new Coord (0, 0);
+        List<LivingEntity> AllEntities = speciesMap.GetEntitiesBySpecies();
+        
+        float totalPopulation = AllEntities.Count;
+
+        float meanDesirability = 0;
+        float meanHappiness = 0;
+        float meanCourage = 0;
+
+        for (int i = 0; i < AllEntities.Count; i++)
+        {
+            Animal currentAnimal = (Animal)AllEntities[i];
+            Genes genes = currentAnimal.genes;
+
+            meanDesirability += genes.desirability;
+            meanHappiness += genes.happiness;
+            meanCourage += genes.courage;
+        }
+
+        meanDesirability /= totalPopulation;
+        meanHappiness /= totalPopulation;
+        meanCourage /= totalPopulation;
+
+        data.AddSnapshot(Mathf.Round(simulationTime), speciesToQuery.ToString() , totalPopulation, meanHappiness, meanCourage, meanDesirability); 
+    }
+
 
     [System.Serializable]
     public struct Population {
