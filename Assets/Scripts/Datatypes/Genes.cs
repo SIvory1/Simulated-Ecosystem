@@ -37,9 +37,6 @@ public class Genes {
         {
             values[i] = GeneArbitration(mother[i], father[i]);
         }
-        
-        
-        
         return new Genes(values);
     }
 
@@ -52,7 +49,6 @@ public class Genes {
             float mutateAmount = RandomGaussian() * maxMutationAmount;
             gene += mutateAmount;
         }
-
         return gene;
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Animal : LivingEntity {
 
-    public const int maxViewDistance = 10;
+    public const int maxViewDistance = 12;
 
     [EnumFlags]
     public Species diet;
@@ -23,8 +23,8 @@ public class Animal : LivingEntity {
     float minBreedChance = 0.5f;
     List<Animal> unimpressedFemales = new List<Animal>();
 
-    float drinkDuration = 6;
-    float eatDuration = 10;
+    float drinkDuration = 5;
+    float eatDuration = 5;
 
     float criticalPercent = 0.7f;
 
@@ -37,7 +37,7 @@ public class Animal : LivingEntity {
     public float thirst;
     public float reproductiveUrge;
     public float currentGestationDuration = 0.0f;
-    public float maxGestationDuration = 15.0f;
+    public float maxGestationDuration = 30.0f;
     public bool pregnant = false;
     float mateWaitTimer = 0.0f;
     public float mateWaitTimerMax = 10.0f;
@@ -92,18 +92,23 @@ public class Animal : LivingEntity {
         genes = Genes.InheritedGenes(mother, father);
 
         material.color = (genes.isMale) ? maleColour : femaleColour;
-        //print("DesirabilityMOTHER : " + mother.desirability + "DesirabilityFATHER : " + father.desirability + "Desirability : " + genes.desirability);
-        
         HappinessModification();
-        
+   
         ChooseNextAction();
     }
 
     void HappinessModification()
     {
         float happinessMod = genes.happiness - 0.5f;
-        moveSpeed += happinessMod;
-        hungerMultiplier += happinessMod;
+        if (species == Species.Rabbit)
+        {
+            moveSpeed = Mathf.Max(0.25f, moveSpeed + happinessMod);
+            hungerMultiplier += happinessMod;
+        }
+        else
+        {
+            moveSpeed = 1.75f;
+        }
     }
 
     protected virtual void Update () {
@@ -113,16 +118,14 @@ public class Animal : LivingEntity {
         thirst += (Time.deltaTime * 1) / timeToDeathByThirst;
 
         if (pregnant) { reproductiveUrge = 0.0f; }
-        else { reproductiveUrge = 0.4f; }
+        else { reproductiveUrge = 0.5f; }
 
         if(pregnant) { currentGestationDuration += Time.deltaTime; }
         if(currentGestationDuration > maxGestationDuration) 
         { 
             pregnant = false;
             currentGestationDuration = 0f;
-            print("babymake");
             Environment.SpawnChildren(rabbitPrefab, coord, genes.values, mateTarget.genes.values);
-            //print(mateTarget.genes.values[1] + " " + genes.values[1]);
         }
         if(currentAction == CreatureAction.GoingToMate) { mateWaitTimer += Time.deltaTime; }
         if(currentAction != CreatureAction.GoingToMate) { mateWaitTimer = 0f; }
@@ -162,11 +165,7 @@ public class Animal : LivingEntity {
         bool currentlyDrinking = currentAction == CreatureAction.Drinking && thirst > 0;
 
         FindPredator();
-        if (beingHunted)
-        {
-            //currentAction = CreatureAction.Fleeing;
-        }
-        else if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
+        if(reproductiveUrge > hunger && reproductiveUrge > thirst && !currentlyEating && !currentlyDrinking && mature)
         {
             FindMate();
         }
@@ -176,7 +175,6 @@ public class Animal : LivingEntity {
             {
                 FindFood();
             }
-            // More thirsty than hungry
             else
             {
                 FindWater();
@@ -234,24 +232,11 @@ public class Animal : LivingEntity {
         if (foodSource) {
             currentAction = CreatureAction.GoingToFood;
             foodTarget = foodSource;
-
-            // Remove previous animal from being hunted
-            //ResetOtherAnimal();
-            // Add the new animal to being hunted
-            //otherAnimal = foodTarget.GetComponent<Animal>();
-            //if (otherAnimal != null)
-            //{
-            //    otherAnimal.beingHunted = true;
-            //    otherAnimal.animalToFleeFrom = this;
-            //}
-
             CreatePath (foodTarget.coord);
 
         } 
         else {
             currentAction = CreatureAction.Exploring;
-
-            //ResetOtherAnimal();
         }
     }
     void ResetOtherAnimal()
@@ -276,7 +261,6 @@ public class Animal : LivingEntity {
         {
             animalToFleeFrom = null;
             beingHunted = false;
-            currentAction = CreatureAction.Exploring;
         }
     }
 

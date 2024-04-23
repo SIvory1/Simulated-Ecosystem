@@ -66,17 +66,6 @@ public class Environment : MonoBehaviour {
 
     }
 
-    void OnDrawGizmos () {
-        /* 
-        if (showMapDebug) {
-            if (preyMap != null && mapCoordTransform != null) {
-                Coord coord = new Coord ((int) mapCoordTransform.position.x, (int) mapCoordTransform.position.z);
-                preyMap.DrawDebugGizmos (coord, mapViewDst);
-            }
-        }
-        */
-    }
-
     public static void RegisterMove (LivingEntity entity, Coord from, Coord to) {
         speciesMaps[entity.species].Move (entity, from, to);
     }
@@ -130,11 +119,8 @@ public class Environment : MonoBehaviour {
         {
             Map speciesMap = speciesMaps[predatorsList[i]];
 
-            float v = -(self.genes.courage * courageViewModifierStatic) + basePredatorViewDistanceStatic; // change this 
-
-            //Debug.Log("Courage View Distance: " + v + " True Courage: " + self.genes.courage);
-
-            predators.AddRange(speciesMap.GetEntities(coord, v));
+            float view = -(self.genes.courage * courageViewModifierStatic) + basePredatorViewDistanceStatic;
+            predators.AddRange(speciesMap.GetEntities(coord, view));
         }
 
         // Return first visible predator
@@ -274,8 +260,17 @@ public class Environment : MonoBehaviour {
 
     public static void SpawnChildren(LivingEntity speciesPrefab, Coord spawnCoord, float[] motherValues, float[] fatherValues)
     {
-        int childAmount = Random.Range(2, 5);
+        int childAmount;  
         
+        if(speciesPrefab.species == Species.Rabbit)
+        {
+            childAmount = Random.Range(2, 5);
+        }
+        else
+        {
+            childAmount = Random.Range(1, 3);
+        }
+
         for (int i = 0; i < childAmount; i++)
         {
             var entity = Instantiate(speciesPrefab);
@@ -328,8 +323,6 @@ public class Environment : MonoBehaviour {
                 }
             }
         }
-
-        //LogPredatorPreyRelationships ();
 
         SpawnTrees ();
 
